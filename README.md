@@ -27,8 +27,24 @@ and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/cfg_to_regex](https://hexdocs.pm/cfg_to_regex).
 
 ## Building
-To build the application, run `mix escript.build` to generate an executable. This executable only requires the Erlang runtime to be installed on the system and can be invoked directly or used `escript`:
+To build the application, run `mix escript.build` to generate an executable.
+
+## Usage
+This executable only requires the Erlang runtime to be installed on the system and can be invoked directly or using `escript`:
 
 `escript cfg_to_regex [start rule] [path/to/grammar.g4]`
 
-Sample grammars can be found in the `examples` directory.
+## Example
+Sample grammars can be found in the `examples` directory. For example does the following context-free (and non-regular) grammar:
+
+```antlr
+hello : 'Hello';
+world : 'World';
+hello_world : hello hello_world world | ', ';
+```
+
+...compile to the following regex:
+
+```
+(?<hello_world>(?<hello>(?:Hello))(?&hello_world)(?<world>(?:World))|(?:, ))
+```
