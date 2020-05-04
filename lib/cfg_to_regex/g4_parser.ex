@@ -2,7 +2,7 @@ defmodule CFGToRegex.G4Parser do
   import NimbleParsec
 
   character = ascii_char([0..127])
-  ident = ascii_string([?0..?9, ?a..?z, ?A..?Z], min: 1) |> tag(:ident)
+  ident = ascii_string([?0..?9, ?a..?z, ?A..?Z, ?_], min: 1) |> tag(:ident)
   literal_quote = ascii_char [?']
   literal = literal_quote |> ascii_string([?0..?9, ?a..?z, ?A..?Z], min: 0) |> concat(literal_quote) |> tag(:literal)
   opt_whitespace = ascii_string [?\s, ?\n, ?\r, ?\t], min: 0

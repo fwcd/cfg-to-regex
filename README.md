@@ -23,3 +23,5 @@ be found at [https://hexdocs.pm/cfg_to_regex](https://hexdocs.pm/cfg_to_regex).
 To build the application, run `mix escript.build` to generate an executable. This executable only requires the Erlang runtime to be installed on the system and can be invoked directly or used `escript`:
 
 `escript cfg_to_regex [path/to/grammar.g4]`
+
+Sample grammars can be found in the `examples` directory.

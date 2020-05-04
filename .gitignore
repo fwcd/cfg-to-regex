@@ -27,3 +27,6 @@ cfg_to_regex-*.tar
 
 # Built escript
 /cfg_to_regex
+
+# ANTLR-generated files
+.antlr
