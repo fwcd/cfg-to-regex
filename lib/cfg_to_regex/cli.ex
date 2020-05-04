@@ -7,6 +7,7 @@ defmodule CFGToRegex.CLI do
 
   def main(args) do
     [expr | _] = args
-    IO.puts G4Parser.g4_grammar(expr)
+    ast = G4Parser.g4_grammar(expr)
+    IO.inspect ast
   end
 end
