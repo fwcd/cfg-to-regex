@@ -27,6 +27,11 @@ defmodule CFGToRegex.RegexGenerator do
         |> Enum.find(fn decl -> name == decl_name(decl) end)
   end
 
+  defp escape(literal) do
+    # Some literals are not correctly escaped automatically
+    Regex.escape(literal) |> String.replace("/", "\\/")
+  end
+
   defp from_rule_arm(ast, arm, visited) do
     case arm do
       [] -> {"", visited}
@@ -38,7 +43,11 @@ defmodule CFGToRegex.RegexGenerator do
           {gen <> next, next_visited}
         {:literal, [literal]} ->
           {next, next_visited} = ast |> from_rule_arm(rest, visited)
-          {"(?:#{literal})" <> next, next_visited}
+          escaped = escape(literal)
+          {"(?:#{escaped})" <> next, next_visited}
+        {:inline_regex, [inline_regex]} ->
+          {next, next_visited} = ast |> from_rule_arm(rest, visited)
+          {"(?:#{inline_regex})" <> next, next_visited}
         _ -> ast |> from_rule_arm(rest, visited)
       end
     end

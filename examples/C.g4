@@ -1,8 +1,8 @@
 grammar C;
 
 IDENTIFIER : [a-zA-Z0-9_]+;
-CONSTANT : [0-9]+; // TODO: Support other constant types
-STRING_LITERAL : '"' [a-zA-Z0-9]+ '"'; // TODO: Support other characters in strings
+CONSTANT : [0-9]+;
+STRING_LITERAL : '"' [a-zA-Z0-9]+ '"';
 SIZEOF : 'sizeof';
 PTR_OP : '->';
 INC_OP : '++';

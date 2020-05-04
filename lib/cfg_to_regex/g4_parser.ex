@@ -1,22 +1,25 @@
 defmodule CFGToRegex.G4Parser do
   import NimbleParsec
 
+  # TODO: Match arbitrary characters as characters rather than binary
   character = ascii_char([0..127])
   ident = ascii_string([?0..?9, ?a..?z, ?A..?Z, ?_], min: 1) |> tag(:ident)
   literal_quote = ascii_char [?']
-  literal = ascii_string([?0..?9, ?a..?z, ?A..?Z, ?\s, ?!, ?&, ?", ?., ?,, ?;, ?:, ?#, ?+, ?|, ?^, ?<, ?>, ?~, ?-, ?=, ?*, ?/, ?$, ?%, ?/, ?(, ?), ?[, ?], ?{, ?}, ??], min: 0) |> tag(:literal)
+  literal = ascii_string([?0..?9, ?a..?z, ?A..?Z, ?\s, ?!, ?&, ?", ?., ?,, ?;, ?:, ?#, ?+, ?|, ?^, ?<, ?>, ?~, ?-, ?=, ?*, ?/, ?$, ?_, ?%, ?/, ?(, ?), ?[, ?], ?{, ?}, ??], min: 0) |> tag(:literal)
   quoted_literal = literal_quote |> concat(literal) |> concat(literal_quote)
-  inline_regex = ascii_string([?0..?9, ?a..?z, ?A..?Z, ?!, ?&, ?", ?., ?,, ?:, ?#, ?^, ?<, ?>, ?~, ?|, ?=, ?+, ?-, ?*, ?/, ?$, ?%, ?/, ?(, ?), ?[, ?], ?{, ?}, ??], min: 0) |> tag(:inline_regex)
+  inline_regex = ascii_string([?0..?9, ?a..?z, ?A..?Z, ?!, ?&, ?", ?., ?,, ?:, ?#, ?^, ?<, ?>, ?~, ?|, ?=, ?+, ?-, ?*, ?/, ?$, ?%, ?_, ?/, ?(, ?), ?[, ?], ?{, ?}, ??], min: 0) |> tag(:inline_regex)
   opt_whitespace = ascii_string [?\s, ?\n, ?\r, ?\t], min: 0
   req_whitespace = ascii_string [?\s, ?\n, ?\r, ?\t], min: 1
   newline_char = ascii_char [?\r, ?\n]
   newline = newline_char |> repeat(newline_char)
 
-  single_line_comment = string("//") |> repeat(lookahead_not(newline) |> concat(character))
+  # TODO: Fix comments
+  single_line_comment = string("//") |> repeat(lookahead_not(newline) |> concat(character)) |> concat(newline)
   multi_line_comment = string("/*") |> repeat(lookahead_not(string "*/") |> concat(character)) |> concat(string "*/")
   comment = choice [single_line_comment, multi_line_comment]
-  opt_white = opt_whitespace
-  req_white = choice [req_whitespace, comment]
+  padded_comment = opt_whitespace |> concat(comment) |> concat(opt_whitespace)
+  opt_white = choice [opt_whitespace, padded_comment]
+  req_white = choice [req_whitespace, padded_comment]
   semi = ascii_char [?;]
   then_semi = concat(opt_white, semi)
 
