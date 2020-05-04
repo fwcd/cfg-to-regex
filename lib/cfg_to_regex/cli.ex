@@ -12,6 +12,7 @@ defmodule CFGToRegex.CLI do
     [start_rule, path | _] = args
     raw = File.read!(path)
     {:ok, ast, _, _, _, _} = G4Parser.g4_grammar(raw)
+    IO.inspect ast
     IO.puts RegexGenerator.from_ast(ast, start_rule)
   end
 end

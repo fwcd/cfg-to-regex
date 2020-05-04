@@ -4,7 +4,7 @@ defmodule CFGToRegex.G4Parser do
   character = ascii_char([0..127])
   ident = ascii_string([?0..?9, ?a..?z, ?A..?Z, ?_], min: 1) |> tag(:ident)
   literal_quote = ascii_char [?']
-  literal = ascii_string([?0..?9, ?a..?z, ?A..?Z, ?\s, ?!, ?&, ?", ?., ?,, ?;, ?:, ?#, ?+, ?-, ?*, ?/, ?$, ?%, ?/, ?(, ?), ?[, ?], ?{, ?}], min: 0) |> tag(:literal)
+  literal = ascii_string([?0..?9, ?a..?z, ?A..?Z, ?\s, ?!, ?&, ?", ?., ?,, ?;, ?:, ?#, ?+, ?|, ?^, ?<, ?>, ?~, ?-, ?=, ?*, ?/, ?$, ?%, ?/, ?(, ?), ?[, ?], ?{, ?}, ??], min: 0) |> tag(:literal)
   quoted_literal = literal_quote |> concat(literal) |> concat(literal_quote)
   opt_whitespace = ascii_string [?\s, ?\n, ?\r, ?\t], min: 0
   req_whitespace = ascii_string [?\s, ?\n, ?\r, ?\t], min: 1
@@ -20,11 +20,18 @@ defmodule CFGToRegex.G4Parser do
   then_semi = concat(opt_white, semi)
 
   grammar_decl = string("grammar") |> concat(req_white) |> concat(ident) |> concat(then_semi) |> tag(:grammar_decl)
+
   rule_symbol = choice [ident, quoted_literal]
   rule_arm = rule_symbol |> repeat(concat(req_white, rule_symbol)) |> tag(:rule_arm)
   rule_rhs = rule_arm |> repeat(opt_white |> concat(string "|") |> concat(opt_white) |> concat(rule_arm))
   rule_name = ident |> tag(:rule_name)
   rule_decl = rule_name |> concat(opt_white) |> concat(string ":") |> concat(opt_white) |> concat(rule_rhs) |> concat(then_semi) |> tag(:rule_decl)
 
-  defparsec :g4_grammar, opt_white |> concat(grammar_decl) |> concat(opt_white) |> concat(repeat(concat(opt_white, rule_decl))) |> concat(opt_white) |> concat(eos())
+  # Note that the fragment arm does not allow semicolons!
+  fragment_arm = ascii_string([?0..?9, ?a..?z, ?A..?Z, ?\s, ?!, ?&, ?", ?., ?,, ?:, ?#, ?^, ?<, ?>, ?~, ?|, ?=, ?+, ?-, ?*, ?/, ?$, ?%, ?/, ?(, ?), ?[, ?], ?{, ?}, ??], min: 0) |> tag(:literal)
+  fragment_rhs = fragment_arm |> repeat(opt_white |> concat(string "|") |> concat(opt_white) |> concat(fragment_arm))
+  fragment_name = ident |> tag(:fragment_name)
+  fragment_decl = string("fragment") |> concat(req_white) |> concat(fragment_name) |> concat(string ":") |> concat(opt_white) |> concat(fragment_rhs) |> concat(then_semi) |> tag(:fragment_decl)
+
+  defparsec :g4_grammar, opt_white |> concat(grammar_decl) |> concat(opt_white) |> concat(repeat(opt_white |> choice([rule_decl, fragment_decl]))) |> concat(opt_white) |> concat(eos())
 end
