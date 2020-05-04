@@ -24,3 +24,6 @@ cfg_to_regex-*.tar
 
 # Elixir language server files
 .elixir_ls
+
+# Built escript
+/cfg_to_regex
