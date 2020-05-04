@@ -3,6 +3,13 @@ A small tool to convert context-free grammars (written in ANTLR syntax) into a r
 
 Modern regex engines support many features that exceed the expressiveness of classic regular expressions, e.g. recursion, backreferences and lookaround, thus making it possible to encode arbitrary CFGs in a single regex.
 
+Hence the generated regex requires the following features:
+
+* **Recursion** to encode arbitrary context-free productions
+    * represented as `(?&name)` where `name` is the name of a capturing group
+* **Named capturing groups** to encode the rule names
+    * represented as `(?<name>...)` where `name` defines the name of the capturing group
+
 ## Installation
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 by adding `cfg_to_regex` to your list of dependencies in `mix.exs`:

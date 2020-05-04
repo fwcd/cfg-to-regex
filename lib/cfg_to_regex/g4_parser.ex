@@ -4,7 +4,8 @@ defmodule CFGToRegex.G4Parser do
   character = ascii_char([0..127])
   ident = ascii_string([?0..?9, ?a..?z, ?A..?Z, ?_], min: 1) |> tag(:ident)
   literal_quote = ascii_char [?']
-  literal = literal_quote |> ascii_string([?0..?9, ?a..?z, ?A..?Z], min: 0) |> concat(literal_quote) |> tag(:literal)
+  literal = ascii_string([?0..?9, ?a..?z, ?A..?Z], min: 0) |> tag(:literal)
+  quoted_literal = literal_quote |> concat(literal) |> concat(literal_quote)
   opt_whitespace = ascii_string [?\s, ?\n, ?\r, ?\t], min: 0
   req_whitespace = ascii_string [?\s, ?\n, ?\r, ?\t], min: 1
   newline_char = ascii_char [?\r, ?\n]
@@ -19,10 +20,11 @@ defmodule CFGToRegex.G4Parser do
   then_semi = concat(opt_white, semi)
 
   grammar_decl = string("grammar") |> concat(req_white) |> concat(ident) |> concat(then_semi) |> tag(:grammar_decl)
-  rule_symbol = choice [ident, literal]
+  rule_symbol = choice [ident, quoted_literal]
   rule_arm = rule_symbol |> repeat(concat(req_white, rule_symbol)) |> tag(:rule_arm)
   rule_rhs = rule_arm |> repeat(opt_white |> concat(string "|") |> concat(opt_white) |> concat(rule_arm))
-  rule_decl = ident |> concat(opt_white) |> concat(string ":") |> concat(opt_white) |> concat(rule_rhs) |> concat(then_semi) |> tag(:rule_decl)
+  rule_name = ident |> tag(:rule_name)
+  rule_decl = rule_name |> concat(opt_white) |> concat(string ":") |> concat(opt_white) |> concat(rule_rhs) |> concat(then_semi) |> tag(:rule_decl)
 
   defparsec :g4_grammar, opt_white |> concat(grammar_decl) |> concat(opt_white) |> concat(repeat(concat(opt_white, rule_decl))) |> concat(opt_white) |> concat(eos())
 end
