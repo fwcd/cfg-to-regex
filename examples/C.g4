@@ -1,5 +1,64 @@
 grammar C;
 
+IDENTIFIER : [a-zA-Z0-9_]+;
+CONSTANT : [0-9]+; // TODO: Support other constant types
+STRING_LITERAL : '"' [a-zA-Z0-9]+ '"'; // TODO: Support other characters in strings
+SIZEOF : 'sizeof';
+PTR_OP : '->';
+INC_OP : '++';
+DEC_OP : '--';
+LEFT_OP : '<<';
+RIGHT_OP : '>>';
+LE_OP : '<';
+GE_OP : '>';
+EQ_OP : '==';
+NE_OP : '!=';
+AND_OP : '&&';
+OR_OP : '||';
+MUL_ASSIGN : '*=';
+DIV_ASSIGN : '/=';
+MOD_ASSIGN : '%=';
+ADD_ASSIGN : '+=';
+SUB_ASSIGN : '-=';
+LEFT_ASSIGN : '<<=';
+RIGHT_ASSIGN : '>>=';
+AND_ASSIGN : '&=';
+XOR_ASSIGN : '^=';
+OR_ASSIGN : '|=';
+TYPE_NAME : IDENTIFIER;
+TYPEDEF : 'typedef';
+EXTERN : 'extern';
+STATIC : 'static';
+AUTO : 'auto';
+REGISTER : 'register';
+CHAR : 'char';
+SHORT : 'short';
+INT : 'int';
+LONG : 'long';
+SIGNED : 'signed';
+UNSIGNED : 'unsigned';
+FLOAT : 'float';
+DOUBLE : 'double';
+CONST : 'const';
+VOLATILE : 'volatile';
+VOID : 'void';
+STRUCT : 'struct';
+UNION : 'union';
+ENUM : 'enum';
+ELLIPSIS : '...';
+CASE : 'case';
+DEFAULT : 'default';
+IF : 'if';
+ELSE : 'else';
+SWITCH : 'switch';
+WHILE : 'while';
+DO : 'do';
+FOR : 'for';
+GOTO : 'goto';
+CONTINUE : 'continue';
+BREAK : 'break';
+RETURN : 'return';
+
 primary_expression
   : IDENTIFIER
   | CONSTANT
