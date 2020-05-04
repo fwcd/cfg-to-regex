@@ -1,27 +1,29 @@
 defmodule CFGToRegex.G4Parser do
   import NimbleParsec
 
-  letter = ascii_char [?a..?z, ?A..?Z]
-  digit = ascii_char [?0..?9]
-  alphanumeric = choice [letter, digit]
-  ident = letter |> repeat(choice [alphanumeric, ascii_char [?_]])
+  character = ascii_char([0..127])
+  ident = ascii_string([?0..?9, ?a..?z, ?A..?Z], min: 1)
+  literal_quote = ascii_char [?']
+  literal = literal_quote |> ascii_string([?0..?9, ?a..?z, ?A..?Z], min: 0) |> concat(literal_quote)
   whitespace_char = ascii_char [?\s, ?\n, ?\r, ?\t]
   opt_whitespace = repeat(whitespace_char)
   req_whitespace = whitespace_char |> repeat(whitespace_char)
   newline_char = ascii_char [?\r, ?\n]
   newline = newline_char |> repeat(newline_char)
 
-  single_line_comment = string("//") |> eventually(newline)
-  multi_line_comment = string("/*") |> eventually(string("*/"))
+  single_line_comment = string("//") |> repeat(lookahead_not(newline) |> concat(character))
+  multi_line_comment = string("/*") |> repeat(lookahead_not(string "*/") |> concat(character)) |> concat(string "*/")
   comment = choice [single_line_comment, multi_line_comment]
   opt_white = opt_whitespace
   req_white = choice [req_whitespace, comment]
   semi = ascii_char [?;]
   then_semi = concat opt_white, semi
 
-  grammar_decl = concat(concat(string("grammar"), req_white), concat(ident, then_semi))
+  grammar_decl = string("grammar") |> concat(req_white) |> concat(ident) |> concat(then_semi)
+  rule_symbol = choice [ident, literal]
+  rule_arm = rule_symbol |> repeat(concat(req_white, rule_symbol))
+  rule_rhs = rule_arm |> repeat(opt_white |> concat(string "|") |> concat(opt_white) |> concat(rule_arm))
+  rule_decl = ident |> concat(opt_white) |> concat(string ":") |> concat(opt_white) |> concat(rule_rhs) |> concat(then_semi)
 
-  # TODO: Rule declarations
-
-  defparsec :g4_grammar, grammar_decl
+  defparsec :g4_grammar, opt_white |> concat(grammar_decl) |> concat(opt_white) |> concat(repeat(concat(opt_white, rule_decl))) |> concat(opt_white)
 end
