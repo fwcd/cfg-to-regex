@@ -4,7 +4,7 @@ defmodule CFGToRegex.G4Parser do
   character = ascii_char([0..127])
   ident = ascii_string([?0..?9, ?a..?z, ?A..?Z, ?_], min: 1) |> tag(:ident)
   literal_quote = ascii_char [?']
-  literal = ascii_string([?0..?9, ?a..?z, ?A..?Z], min: 0) |> tag(:literal)
+  literal = ascii_string([?0..?9, ?a..?z, ?A..?Z, ?\s, ?!, ?&, ?", ?., ?,, ?;, ?:, ?#, ?+, ?-, ?*, ?/, ?$, ?%, ?/, ?(, ?), ?[, ?], ?{, ?}], min: 0) |> tag(:literal)
   quoted_literal = literal_quote |> concat(literal) |> concat(literal_quote)
   opt_whitespace = ascii_string [?\s, ?\n, ?\r, ?\t], min: 0
   req_whitespace = ascii_string [?\s, ?\n, ?\r, ?\t], min: 1
